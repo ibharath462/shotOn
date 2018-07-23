@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:background="@android:color/white"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -20,14 +23,147 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_main" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:text="Color"/>
 
-</android.support.design.widget.CoordinatorLayout>
+
+    <RadioGroup
+        android:id="@+id/theme"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <RadioButton
+            android:id="@+id/white"
+            android:layout_width="match_parent"
+            android:textAlignment="textStart"
+            android:layout_gravity="start"
+            android:layout_height="wrap_content"
+            android:layoutDirection="rtl"
+            android:checked="true"
+            android:text="White" />
+
+
+
+        <RadioButton
+            android:id="@+id/black"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="textStart"
+            android:layout_gravity="start"
+            android:layoutDirection="rtl"
+            android:text="Black" />
+
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginTop="10dp"
+        android:textColor="@android:color/black"
+        android:text="Icon"/>
+
+    <Spinner android:id="@+id/mySpinner"
+        android:layout_marginTop="5dp"
+        android:background="@android:color/darker_gray"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <CheckBox
+        android:layout_width="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_height="wrap_content"
+        android:textAlignment="textStart"
+        android:layout_gravity="start"
+        android:layoutDirection="rtl"
+        android:text="Use seperate selfie icon ? "
+        />
+
+
+
+
+
+    <CheckBox
+        android:layout_width="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_height="wrap_content"
+        android:textAlignment="textStart"
+        android:layout_gravity="start"
+        android:textStyle="bold"
+        android:layoutDirection="rtl"
+        android:text="Bold "
+        />
+
+    <CheckBox
+        android:layout_width="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_height="wrap_content"
+        android:textAlignment="textStart"
+        android:layout_gravity="start"
+        android:layoutDirection="rtl"
+        android:textStyle="italic"
+        android:text="Italic"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="22sp"
+        
+        android:textStyle="bold"
+        android:layout_marginTop="10dp"
+        android:textColor="@android:color/black"
+        android:text="Shot on text"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:id="@+id/sOnId"
+        android:hint="Hit enter for next line"
+        android:text="Shot on OnePlus\nBy Bharath Asokan"
+        android:layout_height="100dp" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="50dp"
+            android:layout_height="wrap_content"
+            android:text="Preview"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_marginRight="50dp"
+            android:id="@+id/start"
+            android:layout_height="wrap_content"
+            android:text="Start"/>
+
+    </LinearLayout>
+
+
+
+
+</LinearLayout>

@@ -1,9 +1,5 @@
 package com.example.bharath_5493.shoton;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -17,17 +13,15 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
-import android.os.FileObserver;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.provider.MediaStore;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -58,30 +52,9 @@ public class cs extends Service {
         Toast.makeText(getApplicationContext(),"Staretd service...",Toast.LENGTH_LONG).show();
 
         final String PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/DCIM/Camera";
-//        FileObserver observer = new FileObserver(PATH) {
-//            @Override
-//            public void onEvent(int event, String file) {
-//
-//                //if it's not CREATE event, return
-//                if(event != FileObserver.CREATE)
-//                    return;
-//
-//                byte[] bytes = new byte[0];
-//                String filePath = PATH + "/" + file;
-//
-//                //Toast.makeText(getApplicationContext(),"" + filePath,Toast.LENGTH_LONG).show();
-//                Log.d("SHOT",""+filePath + "     " + event);
-//                Intent i = new Intent(cs.this,MainActivity.class);
-//                i.putExtra("path",filePath);
-//                startActivity(i);
-//
-//                //use byte data here
-//            }
-//        };
-
-        //observer.startWatching();
 
         final String TAG = "SHOT";
+
 
         HandlerThread handlerThread = new HandlerThread("content_observer");
         handlerThread.start();
@@ -116,6 +89,9 @@ public class cs extends Service {
                             try {
                                 cursor = getContentResolver().query(uri, new String[] {
                                         MediaStore.Images.Media.DISPLAY_NAME,
+                                        MediaStore.Images.Media.WIDTH,
+                                        MediaStore.Images.Media.HEIGHT,
+                                        MediaStore.Images.Media.ORIENTATION,
                                         MediaStore.Images.Media.DATA
                                 }, null, null, null);
                                 if (cursor != null && cursor.moveToFirst()) {
@@ -124,16 +100,33 @@ public class cs extends Service {
                                     // TODO: apply filter on the file name to ensure it's screen shot event
                                     Log.d(TAG, "screen shot added " + fileName + " " + path);
 
+                                    if(path.contains("DCIM")){
 
-                                    Bitmap bmp = BitmapFactory.decodeFile(path);
+                                        BitmapFactory.Options options = new BitmapFactory.Options();
+                                        options.inJustDecodeBounds = true;
+                                        BitmapFactory.decodeFile(path, options);
+                                        String imageHeight = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.HEIGHT));
+                                        String imageWidth = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.WIDTH));;
+                                        String orientation = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION));;
 
-                                    Matrix matrix = new Matrix();
-                                    matrix.postRotate(90);
-                                    Bitmap rotatedBitmap = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+                                        Bitmap bmp = BitmapFactory.decodeFile(path);
+                                        if(orientation.equals("90")){
+                                            Matrix matrix = new Matrix();
+                                            matrix.postRotate(90);
+                                            bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+                                        }else if(orientation.equals("270")){
+                                            Matrix matrix = new Matrix();
+                                            matrix.postRotate(270);
+                                            bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
+                                        }
+                                        bmp = drawTextToBitmap(getApplicationContext(),bmp,"பரத்தால் சுடப்பட்டது\nஒன் ப்ளஸ்ல்");
 
-
-                                    bmp = drawTextToBitmap(getApplicationContext(),rotatedBitmap,"Shot on OnePlus\nBy Bharath Asokan");
-                                    SaveImage(bmp);
+                                        //Intent i = new Intent(cs.this,MainActivity.class);
+                                        //i.putExtra("path",path);
+                                        //startActivity(i);
+                                        SaveImage(bmp);
+                                        Log.d(TAG, "Width " + imageWidth + " height" + imageHeight + " orientation " + orientation);
+                                    }
 
                                 }
                             } finally {
@@ -196,6 +189,8 @@ public class cs extends Service {
             paint.setColor(Color.WHITE);
             // text size in pixels
             paint.setTextSize((int) (48 * scale));
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD_ITALIC));
             // text shadow
             //paint.setShadowLayer(1f, 0f, 1f, Color.DKGRAY);
 
@@ -219,7 +214,7 @@ public class cs extends Service {
             }
 
             Bitmap icon = BitmapFactory.decodeResource(getResources(),
-                    R.drawable.camera);
+                    R.drawable.camera1);
 
             canvas.drawBitmap(icon,40,bitmap.getHeight() - bounds.height()*noOfLines - 80,null);
             return bitmap;
@@ -232,6 +227,45 @@ public class cs extends Service {
         }
 
     }
+//
+//    public static Bitmap modifyOrientation(Bitmap bitmap, String image_absolute_path) throws IOException {
+//        ExifInterface ei = new ExifInterface(image_absolute_path);
+//        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+//        Log.d("SHOT", "" + orientation);
+//        switch (orientation) {
+//            case ExifInterface.ORIENTATION_ROTATE_90:
+//                return rotate(bitmap, 90);
+//
+//            case ExifInterface.ORIENTATION_ROTATE_180:
+//                return rotate(bitmap, 180);
+//
+//            case ExifInterface.ORIENTATION_ROTATE_270:
+//                return rotate(bitmap, 270);
+//
+//            case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
+//                return flip(bitmap, true, false);
+//
+//            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+//                return flip(bitmap, false, true);
+//
+//            default:
+//                return bitmap;
+//        }
+//    }
+//
+//    public static Bitmap rotate(Bitmap bitmap, float degrees) {
+//        Matrix matrix = new Matrix();
+//        matrix.postRotate(degrees);
+//        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+//    }
+//
+//    public static Bitmap flip(Bitmap bitmap, boolean horizontal, boolean vertical) {
+//        Matrix matrix = new Matrix();
+//        matrix.preScale(horizontal ? -1 : 1, vertical ? -1 : 1);
+//        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+//    }
+
+
 
 
 }

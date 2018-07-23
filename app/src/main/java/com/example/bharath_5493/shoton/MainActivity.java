@@ -7,23 +7,24 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.io.File;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     ImageView img;
+    RadioGroup rg;
     RelativeLayout n;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -44,21 +46,33 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        rg = (RadioGroup)findViewById(R.id.theme);
+
+        Button fab = (Button) findViewById(R.id.start);
+        final EditText sOnId = (EditText)findViewById(R.id.sOnId);
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
-
-                startService(new Intent(MainActivity.this,cs.class));
+            public void onClick(View v) {
+                //startService(new Intent(MainActivity.this,cs.class));
+                Toast.makeText(getApplicationContext(),"" + sOnId.getText().toString(),Toast.LENGTH_SHORT).show();
             }
         });
 
 
-        img = (ImageView)findViewById(R.id.img);
-        n = (RelativeLayout) findViewById(R.id.n);
+        //img = (ImageView)findViewById(R.id.img);
+        //n = (RelativeLayout) findViewById(R.id.n);
+
+        int selectedId = rg.getCheckedRadioButtonId();
+        Spinner spinner = (Spinner) findViewById(R.id.mySpinner);
+        RadioButton theme = (RadioButton) findViewById(selectedId);
+
+        String[] textArray = { "clouds", "mark", "techcrunch", "times" };
+        Integer[] imageArray = { R.drawable.camera1, R.drawable.camera1,
+                R.drawable.camera1, R.drawable.camera1};
+
+        SpinnerAdapter adapter = new SpinnerAdapter(this, R.layout.spinner_value_layout, textArray, imageArray);
+        spinner.setAdapter(adapter);
 
 
         if(getIntent() != null && getIntent().getStringExtra("path") != null){
@@ -68,7 +82,9 @@ public class MainActivity extends AppCompatActivity {
 
 
             bmp = drawTextToBitmap(getApplicationContext(),bmp,"Shot on OnePlus\nBy Bharath Asokan");
-
+//            img.setImageBitmap(bmp);
+//            img.setMaxHeight(bmp.getHeight());
+//            img.setMaxWidth(bmp.getWidth());
 
             SaveImage(bmp);
         }
