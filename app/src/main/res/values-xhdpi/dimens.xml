@@ -1,6 +1,6 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="textSize">32sp</dimen>
-    <dimen name="mTop">10dp</dimen>
-    <dimen name="mBottom">10dp</dimen>
+    <dimen name="mTop">20dp</dimen>
+    <dimen name="mBottom">0dp</dimen>
 </resources>

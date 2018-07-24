@@ -110,6 +110,7 @@ public class cs extends Service {
                                         String orientation = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.ORIENTATION));;
 
                                         Bitmap bmp = BitmapFactory.decodeFile(path);
+                                        boolean isSelfie = false;
                                         if(orientation.equals("90")){
                                             Matrix matrix = new Matrix();
                                             matrix.postRotate(90);
@@ -117,9 +118,10 @@ public class cs extends Service {
                                         }else if(orientation.equals("270")){
                                             Matrix matrix = new Matrix();
                                             matrix.postRotate(270);
+                                            isSelfie = true;
                                             bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
                                         }
-                                        bmp = drawTextToBitmap(getApplicationContext(),bmp,"பரத்தால் சுடப்பட்டது\nஒன் ப்ளஸ்ல்");
+                                        bmp = drawTextToBitmap(getApplicationContext(),bmp,"பரத்தால் சுடப்பட்டது\nஒன் ப்ளஸ்ல்",isSelfie);
 
                                         //Intent i = new Intent(cs.this,MainActivity.class);
                                         //i.putExtra("path",path);
@@ -168,7 +170,7 @@ public class cs extends Service {
         }
     }
 
-    public Bitmap drawTextToBitmap(Context mContext, Bitmap bitmap, String gText) {
+    public Bitmap drawTextToBitmap(Context mContext, Bitmap bitmap, String gText,boolean isSelfie) {
         try {
             Resources resources = mContext.getResources();
             float scale = resources.getDisplayMetrics().density;
@@ -215,6 +217,11 @@ public class cs extends Service {
 
             Bitmap icon = BitmapFactory.decodeResource(getResources(),
                     R.drawable.camera1);
+
+            if(isSelfie){
+                icon = BitmapFactory.decodeResource(getResources(),
+                        R.drawable.selfie);
+            }
 
             canvas.drawBitmap(icon,40,bitmap.getHeight() - bounds.height()*noOfLines - 80,null);
             return bitmap;

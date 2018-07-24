@@ -54,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //startService(new Intent(MainActivity.this,cs.class));
-                Toast.makeText(getApplicationContext(),"" + sOnId.getText().toString(),Toast.LENGTH_SHORT).show();
+                startService(new Intent(MainActivity.this,cs.class));
+                //Toast.makeText(getApplicationContext(),"" + sOnId.getText().toString(),Toast.LENGTH_SHORT).show();
             }
         });
 
