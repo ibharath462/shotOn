@@ -32,16 +32,16 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="monospace"
             android:textSize="@dimen/textSize"
             android:textStyle="bold"
             android:textColor="@android:color/black"
-            android:text="Color"/>
+            android:text="Theme"/>
 
 
         <RadioGroup
             android:id="@+id/theme"
             android:orientation="vertical"
-            android:layout_marginTop="5dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -80,114 +80,91 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/textSize"
-            android:textStyle="bold"
             android:layout_marginTop="@dimen/mTop"
+            android:textSize="@dimen/textSize"
+            android:fontFamily="monospace"
+            android:textStyle="bold"
             android:textColor="@android:color/black"
             android:text="Icon"/>
 
-        <Spinner android:id="@+id/mySpinner"
-            android:layout_marginTop="5dp"
-            android:background="@android:color/darker_gray"
+        <Spinner android:id="@+id/rear"
+            android:background="#4CAF50"
+            android:layout_marginTop="@dimen/mTop"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_marginTop="@dimen/mTop"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAlignment="textStart"
-            android:layout_gravity="start"
-            android:layoutDirection="rtl"
-            android:text="Use seperate selfie icon ? "
-            />
+            android:layout_marginTop="@dimen/mTop"
+            android:textSize="@dimen/textSize"
+            android:fontFamily="monospace"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:text="Selfie special"/>
+
+        <Spinner android:id="@+id/front"
+            android:background="#4CAF50"
+            android:layout_marginTop="@dimen/mTop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:orientation="vertical"
+        android:layout_marginTop="@dimen/mTop"
         android:layout_height="wrap_content">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/textSize"
+            android:fontFamily="monospace"
             android:textStyle="bold"
-            android:layout_marginTop="@dimen/mTop"
             android:textColor="@android:color/black"
             android:text="Shot on text"/>
 
         <EditText
             android:layout_width="match_parent"
-            android:id="@+id/sOnId"
+            android:id="@+id/sText"
+            android:textStyle="bold"
             android:hint="Hit enter for next line"
-            android:text="Shot on OnePlus\nBy Bharath Asokan"
+            android:text="பரத்தால் சுடப்பட்டது\nஒன் ப்ளஸ்ல்"
             android:layout_height="100dp" />
 
 
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_marginTop="10dp"
-            android:layout_height="wrap_content"
-            android:textAlignment="textStart"
-            android:layout_gravity="start"
-            android:textStyle="bold"
-            android:layoutDirection="rtl"
-            android:text="Bold "
-            />
-
-        <CheckBox
-            android:layout_width="match_parent"
-            android:layout_marginTop="10dp"
-            android:layout_height="wrap_content"
-            android:textAlignment="textStart"
-            android:layout_gravity="start"
-            android:layoutDirection="rtl"
-            android:textStyle="italic"
-            android:text="Italic"
-            />
-
     </LinearLayout>
-
-
-
-
-
-
-    <View
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-
+    
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="@dimen/mBottom"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <Button
-            android:layout_width="wrap_content"
-            android:layout_marginLeft="50dp"
+            android:id="@+id/preview"
+            android:layout_width="match_parent"
+            android:textSize="32sp"
+            android:layout_marginTop="@dimen/mTop"
+            android:background="@drawable/rounded_buttonstart"
+            android:textColor="@android:color/white"
             android:layout_height="wrap_content"
-            android:text="Preview"/>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:text="Preview" />
 
         <Button
-            android:layout_width="wrap_content"
-            android:layout_marginRight="50dp"
-            android:id="@+id/start"
+            android:id="@+id/startService"
+            android:layout_width="match_parent"
+            android:textSize="32sp"
+            android:layout_marginTop="@dimen/mTop"
+            android:background="@drawable/rounded_buttonstart"
+            android:textColor="@android:color/white"
             android:layout_height="wrap_content"
-            android:text="Start"/>
+            android:text="START" />
+
 
     </LinearLayout>
-
-
 
 
 </LinearLayout>

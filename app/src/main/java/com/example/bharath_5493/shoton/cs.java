@@ -3,6 +3,7 @@ package com.example.bharath_5493.shoton;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
@@ -121,7 +122,7 @@ public class cs extends Service {
                                             isSelfie = true;
                                             bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
                                         }
-                                        bmp = drawTextToBitmap(getApplicationContext(),bmp,"பரத்தால் சுடப்பட்டது\nஒன் ப்ளஸ்ல்",isSelfie);
+                                        bmp = drawTextToBitmap(getApplicationContext(),bmp,isSelfie);
 
                                         //Intent i = new Intent(cs.this,MainActivity.class);
                                         //i.putExtra("path",path);
@@ -170,33 +171,33 @@ public class cs extends Service {
         }
     }
 
-    public Bitmap drawTextToBitmap(Context mContext, Bitmap bitmap, String gText,boolean isSelfie) {
+    public Bitmap drawTextToBitmap(Context mContext, Bitmap bitmap,boolean isSelfie) {
         try {
             Resources resources = mContext.getResources();
+            final SharedPreferences prefs = getApplicationContext().getSharedPreferences("com.pg.shoton", Context.MODE_PRIVATE);
+
+            String gText = prefs.getString("sText","பரத்தால் சுடப்பட்டது\nஒன் ப்ளஸ்ல்");
+            int selectedIcon = Integer.parseInt(prefs.getString("rear","2131165296"));
+            String theme = prefs.getString("theme","white");
+
+
             float scale = resources.getDisplayMetrics().density;
 
             android.graphics.Bitmap.Config bitmapConfig =   bitmap.getConfig();
-            // set default bitmap config if none
             if(bitmapConfig == null) {
                 bitmapConfig = android.graphics.Bitmap.Config.ARGB_8888;
             }
-            // resource bitmaps are imutable,
-            // so we need to convert it to mutable one
             bitmap = bitmap.copy(bitmapConfig, true);
 
             Canvas canvas = new Canvas(bitmap);
-            // new antialised Paint
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            // text color - #3D3D3D
             paint.setColor(Color.WHITE);
-            // text size in pixels
+            if(theme.equals("black")){
+                paint.setColor(Color.BLACK);
+            }
             paint.setTextSize((int) (48 * scale));
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD_ITALIC));
-            // text shadow
-            //paint.setShadowLayer(1f, 0f, 1f, Color.DKGRAY);
-
-            // draw text to the Canvas center
+            paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
             Rect bounds = new Rect();
             int noOfLines = 0;
             for (String line: gText.split("\n")) {
@@ -216,11 +217,12 @@ public class cs extends Service {
             }
 
             Bitmap icon = BitmapFactory.decodeResource(getResources(),
-                    R.drawable.camera1);
+                    selectedIcon);
 
             if(isSelfie){
+                selectedIcon = Integer.parseInt(prefs.getString("front","2131165325"));
                 icon = BitmapFactory.decodeResource(getResources(),
-                        R.drawable.selfie);
+                        selectedIcon);
             }
 
             canvas.drawBitmap(icon,40,bitmap.getHeight() - bounds.height()*noOfLines - 80,null);
@@ -234,43 +236,7 @@ public class cs extends Service {
         }
 
     }
-//
-//    public static Bitmap modifyOrientation(Bitmap bitmap, String image_absolute_path) throws IOException {
-//        ExifInterface ei = new ExifInterface(image_absolute_path);
-//        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-//        Log.d("SHOT", "" + orientation);
-//        switch (orientation) {
-//            case ExifInterface.ORIENTATION_ROTATE_90:
-//                return rotate(bitmap, 90);
-//
-//            case ExifInterface.ORIENTATION_ROTATE_180:
-//                return rotate(bitmap, 180);
-//
-//            case ExifInterface.ORIENTATION_ROTATE_270:
-//                return rotate(bitmap, 270);
-//
-//            case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
-//                return flip(bitmap, true, false);
-//
-//            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
-//                return flip(bitmap, false, true);
-//
-//            default:
-//                return bitmap;
-//        }
-//    }
-//
-//    public static Bitmap rotate(Bitmap bitmap, float degrees) {
-//        Matrix matrix = new Matrix();
-//        matrix.postRotate(degrees);
-//        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-//    }
-//
-//    public static Bitmap flip(Bitmap bitmap, boolean horizontal, boolean vertical) {
-//        Matrix matrix = new Matrix();
-//        matrix.preScale(horizontal ? -1 : 1, vertical ? -1 : 1);
-//        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-//    }
+
 
 
 
