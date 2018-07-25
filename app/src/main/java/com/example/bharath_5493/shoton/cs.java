@@ -1,5 +1,9 @@
 package com.example.bharath_5493.shoton;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -17,12 +21,15 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -46,6 +53,7 @@ public class cs extends Service {
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -142,7 +150,7 @@ public class cs extends Service {
                     }
                 });
         Log.d("SHOT",""+PATH);
-        //createNotification();
+        createNotification();
 
         return START_NOT_STICKY;
 
@@ -197,7 +205,7 @@ public class cs extends Service {
             }
             paint.setTextSize((int) (48 * scale));
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
+            paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
             Rect bounds = new Rect();
             int noOfLines = 0;
             for (String line: gText.split("\n")) {
@@ -237,8 +245,74 @@ public class cs extends Service {
 
     }
 
+    private NotificationManager manager;
+
+    private NotificationManager getManager() {
+        if (manager == null) {
+            manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+        return manager;
+    }
 
 
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    public void createNotification(){
+
+        final SharedPreferences prefs = getApplicationContext().getSharedPreferences("com.pg.shoton", Context.MODE_PRIVATE);
+        int selectedIcon = Integer.parseInt(prefs.getString("rear","2131165296"));
+        String gText = prefs.getString("sText","பரத்தால் சுடப்பட்டது\nஒன் ப்ளஸ்ல்");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+
+            NotificationChannel chan1 = new NotificationChannel("default",
+                    "default", NotificationManager.IMPORTANCE_DEFAULT);
+
+            chan1.setLightColor(Color.GREEN);
+            chan1.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            getManager().createNotificationChannel(chan1);
+
+            PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+                    new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+            Notification n = new Notification.Builder(this, chan1.getId())
+                    .setContentTitle("@shotOn is running...")
+                    .setContentText(""+gText)
+                    .setSmallIcon(selectedIcon)
+                    .setContentIntent(contentIntent)
+                    .build();
+
+
+
+            startForeground(2, n);
+
+
+        } else {
+
+            Notification.Style style = new Notification.BigTextStyle().bigText("" + gText);
+            Notification notification = new Notification.Builder(getApplicationContext())
+                    .setContentTitle("#shotOn")
+                    .setContentText("" + gText)
+                    .setSmallIcon(selectedIcon)
+                    .setStyle(style)
+                    .setOngoing(true)
+                    .build();
+
+            PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+                    new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+
+            notification.contentIntent = contentIntent;
+
+            startForeground(1434, notification);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        NotificationManager mNotificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.cancelAll();
+    }
 
 }

@@ -1,5 +1,7 @@
 package com.example.bharath_5493.shoton;
 
+import android.app.ActivityManager;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -35,6 +37,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Arrays;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
@@ -45,6 +48,13 @@ public class MainActivity extends AppCompatActivity {
     EditText sText;
     RelativeLayout n;
     int wb = 0;
+    Button startService;
+    Spinner rear,front;
+    String[] iconText;
+    Integer[] white;
+    Integer[] black;
+    SpinnerAdapter whiteAdapter,blackAdapter;
+    SharedPreferences prefs;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -54,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final SharedPreferences prefs = getApplicationContext().getSharedPreferences("com.pg.shoton", Context.MODE_PRIVATE);
+        prefs = getApplicationContext().getSharedPreferences("com.pg.shoton", Context.MODE_PRIVATE);
 
         if(prefs.getBoolean("firstrun", true)){
             prefs.edit().putString("theme", "white").commit();
@@ -63,114 +73,44 @@ public class MainActivity extends AppCompatActivity {
 
         rg = (RadioGroup)findViewById(R.id.theme);
 
-        final Button fab = (Button) findViewById(R.id.startService);
-        final EditText sOnId = (EditText)findViewById(R.id.sText);
+        startService = (Button) findViewById(R.id.startService);
         sText = (EditText)findViewById(R.id.sText);
 
 
-        fab.setOnClickListener(new View.OnClickListener() {
+        startService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startService(new Intent(MainActivity.this,cs.class));
-                fab.setBackground(getResources().getDrawable(R.drawable.rounded_buttonstop));
-                fab.setText("STOP");
+                if(!isMyServiceRunning(cs.class)){
+                    startService(new Intent(MainActivity.this,cs.class));
+                    startService.setBackground(getResources().getDrawable(R.drawable.rounded_buttonstop));
+                    startService.setText("STOP");
+                }else{
+                    Intent shotOnService = new Intent(getApplicationContext(),cs.class);
+                    stopService(shotOnService);
+                    NotificationManager mNotificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+                    mNotificationManager.cancelAll();
+                    startService.setBackground(getResources().getDrawable(R.drawable.rounded_buttonstart));
+                    startService.setText("START");
+                }
             }
         });
 
-        final Spinner rear = (Spinner) findViewById(R.id.rear);
-        final Spinner front = (Spinner) findViewById(R.id.front);
+        rear = (Spinner) findViewById(R.id.rear);
+        front = (Spinner) findViewById(R.id.front);
         setActionBar("#shotOn");
 
-        String[] textArray = { "Camera Adjust", "Cake", "Altered camera", "Selfie","Camera 1","Focus","HDR","Grain","Nature & People","Nature","Camera 2","Portrait","Faces","Tonality","Whatshot" };
-        final Integer[] white = { R.drawable.badjust1, R.drawable.cake1, R.drawable.cameraalt1, R.drawable.selfie1,R.drawable.bcamera1, R.drawable.cfocus1, R.drawable.hdr1, R.drawable.grain1,
+        iconText = new String[]{"Camera Adjust", "Cake", "Altered camera", "Selfie", "Camera 1", "Focus", "HDR", "Grain", "Nature & People", "Nature", "Camera 2", "Portrait", "Faces", "Tonality", "Whatshot"};
+        white = new Integer[]{ R.drawable.badjust1, R.drawable.cake1, R.drawable.cameraalt1, R.drawable.selfie1,R.drawable.bcamera1, R.drawable.cfocus1, R.drawable.hdr1, R.drawable.grain1,
                                 R.drawable.naturepeople1, R.drawable.nature1, R.drawable.pcamera1, R.drawable.portrait1,R.drawable.tagfaces1, R.drawable.tonality1, R.drawable.whatshot1};
-        final Integer[] black = { R.drawable.badjust2, R.drawable.cake2, R.drawable.cameraalt2, R.drawable.selfie,R.drawable.bcamera2, R.drawable.cfocus2, R.drawable.hdr2, R.drawable.grain2,
+        black = new Integer[]{ R.drawable.badjust2, R.drawable.cake2, R.drawable.cameraalt2, R.drawable.selfie,R.drawable.bcamera2, R.drawable.cfocus2, R.drawable.hdr2, R.drawable.grain2,
                 R.drawable.naturepeople2, R.drawable.nature2, R.drawable.pcamera2, R.drawable.portrait,R.drawable.tagfaces2, R.drawable.tonality2, R.drawable.whatshot2};
 
-        final SpinnerAdapter whiteAdapter = new SpinnerAdapter(this, R.layout.spinner_value_layout, textArray, white);
-        final SpinnerAdapter blackAdapter = new SpinnerAdapter(this, R.layout.spinner_value_layout, textArray, black);
-        rear.setAdapter(whiteAdapter);
-        front.setAdapter(whiteAdapter);
+        whiteAdapter = new SpinnerAdapter(this, R.layout.spinner_value_layout, iconText, white);
+        blackAdapter = new SpinnerAdapter(this, R.layout.spinner_value_layout, iconText, black);
 
-        rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                RadioButton checkedRadioButton = (RadioButton)group.findViewById(checkedId);
-                boolean isChecked = checkedRadioButton.isChecked();
-
-                if(checkedId == R.id.white && isChecked){
-                    prefs.edit().putString("theme", "white").commit();
-                    wb= 0;
-                    rear.setAdapter(whiteAdapter);
-                    front.setAdapter(whiteAdapter);
-                    whiteAdapter.notifyDataSetChanged();
-
-                }else{
-                    prefs.edit().putString("theme", "black").commit();
-                    wb= 1;
-                    rear.setAdapter(blackAdapter);
-                    front.setAdapter(blackAdapter);
-                    blackAdapter.notifyDataSetChanged();
-                }
-            }
-        });
+        initialize();
 
 
-        rear.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                Integer selectedIcon = white[position];
-                if(wb == 1){
-                    selectedIcon = black[position];
-                }
-                prefs.edit().putString("rear", ""+selectedIcon).commit();
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        front.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                Integer selectedIcon = white[position];
-                if(wb == 1){
-                    selectedIcon = black[position];
-                }
-                prefs.edit().putString("rear", ""+selectedIcon).commit();
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-
-        sText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-                prefs.edit().putString("sText", ""+sText.getText().toString()).commit();
-
-            }
-        });
 
 
 
@@ -211,5 +151,185 @@ public class MainActivity extends AppCompatActivity {
         actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#00695C")));
         actionBar.show();
 
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    public void initialize(){
+
+        String theme = prefs.getString("theme","white");
+
+        Log.d("SHITT THEME",""+theme);
+
+        setAdapters(theme,false);
+
+        String shotOn = prefs.getString("sText","Shot on OnePlus\nBy Bharath Asokan");
+
+        sText.setText(""+shotOn);
+
+        if(isMyServiceRunning(cs.class)){
+
+            startService.setBackground(getResources().getDrawable(R.drawable.rounded_buttonstop));
+            startService.setText("STOP");
+
+        }
+
+
+    }
+
+    public void setAdapters(String theme,boolean fromListener){
+
+        String rearDef = "2131165296";
+        String frontDef = "2131165296";
+
+        if(!fromListener){
+            if(theme.equals("white")){
+                ((RadioButton)rg.getChildAt(0)).setChecked(true);
+            }else{
+                rearDef = "2131165297";
+                frontDef = "2131165297";
+                ((RadioButton)rg.getChildAt(1)).setChecked(true);
+            }
+        }
+
+        Integer rearIcon = Integer.parseInt(prefs.getString("rear",rearDef));
+        Integer frontIcon = Integer.parseInt(prefs.getString("front",frontDef));
+
+
+        if(theme.equals("white")){
+            rear.setAdapter(whiteAdapter);
+            front.setAdapter(whiteAdapter);
+            int index = Arrays.asList(white).indexOf(rearIcon);
+            if(fromListener == true && index == -1){
+                index = Arrays.asList(white).indexOf(rearIcon);
+            }
+            Log.d("SHITT W",""+rearIcon + "  " + Arrays.asList(white).toString() + " " + index);
+            rear.setSelection(index);
+            index = Arrays.asList(white).indexOf(frontIcon);
+            if(fromListener == true && index == -1){
+                index = Arrays.asList(white).indexOf(frontIcon);
+            }
+            Log.d("SHITT W",""+rearIcon + "  " + Arrays.asList(white).toString() + " " + index);
+            front.setSelection(index);
+        }else{
+            wb = 1;
+            rear.setAdapter(blackAdapter);
+            front.setAdapter(blackAdapter);
+            int index = Arrays.asList(black).indexOf(rearIcon);
+            if(fromListener == true && index == -1){
+                index = Arrays.asList(white).indexOf(rearIcon);
+            }
+            rear.setSelection(index);
+            Log.d("SHITT B",""+rearIcon + "  " + Arrays.asList(black).toString() + " "  + index);
+            index = Arrays.asList(black).indexOf(frontIcon);
+            if(fromListener == true && index == -1){
+                index = Arrays.asList(white).indexOf(frontIcon);
+            }
+            Log.d("SHITT B",""+rearIcon + "  " + Arrays.asList(black).toString() + " "  + index);
+            front.setSelection(index);
+        }
+
+        addListeners();
+
+    }
+
+    public void addListeners(){
+
+        rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                RadioButton checkedRadioButton = (RadioButton)group.findViewById(checkedId);
+                boolean isChecked = checkedRadioButton.isChecked();
+
+                if(checkedId == R.id.white && isChecked){
+                    prefs.edit().putString("theme", "white").commit();
+                    wb= 0;
+                    setAdapters("white",true);
+
+
+                }else{
+                    prefs.edit().putString("theme", "black").commit();
+                    wb= 1;
+                    setAdapters("black",true);
+                }
+            }
+        });
+
+
+        rear.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                Integer selectedIcon = white[position];
+                if(wb == 1){
+                    selectedIcon = black[position];
+                    Log.d("SHITT BCR",""+selectedIcon + "  " + Arrays.asList(black).toString());
+                }else{
+                    Log.d("SHITT WCR",""+selectedIcon + "  " + Arrays.asList(white).toString());
+                }
+                prefs.edit().putString("rear", ""+selectedIcon).commit();
+                Toast.makeText(getApplicationContext(),"Settings updated T:-)",Toast.LENGTH_SHORT).show();
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        front.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                Integer selectedIcon = white[position];
+                if(wb == 1){
+                    selectedIcon = black[position];
+                    Log.d("SHITT BCF",""+selectedIcon + "  " + Arrays.asList(black).toString());
+                }else{
+                    Log.d("SHITT WCF",""+selectedIcon + "  " + Arrays.asList(white).toString());
+                }
+                prefs.edit().putString("front", ""+selectedIcon).commit();
+                Toast.makeText(getApplicationContext(),"Settings updated T:-)",Toast.LENGTH_SHORT).show();
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
+        sText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                prefs.edit().putString("sText", ""+sText.getText().toString()).commit();
+                Toast.makeText(getApplicationContext(),"Settings updated Text:-)",Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
