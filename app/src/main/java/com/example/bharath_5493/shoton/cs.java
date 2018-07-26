@@ -278,7 +278,7 @@ public class cs extends Service {
 
 
             Notification n = new Notification.Builder(this, chan1.getId())
-                    .setContentTitle("@shotOn is running...")
+                    .setContentTitle("#shotOn is running...")
                     .setContentText(""+gText)
                     .setSmallIcon(selectedIcon)
                     .setContentIntent(contentIntent)

@@ -1,10 +1,13 @@
 package com.example.bharath_5493.shoton;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.NotificationManager;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,10 +16,13 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -24,11 +30,13 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
@@ -48,13 +56,16 @@ public class MainActivity extends AppCompatActivity {
     EditText sText;
     RelativeLayout n;
     int wb = 0;
-    Button startService;
+    Button startService,preview;
     Spinner rear,front;
     String[] iconText;
+    boolean isPreviewButtonLongPressed = false;
     Integer[] white;
     Integer[] black;
     SpinnerAdapter whiteAdapter,blackAdapter;
     SharedPreferences prefs;
+    int exitCount = 0;
+    LinearLayout mainLL;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -69,12 +80,36 @@ public class MainActivity extends AppCompatActivity {
         if(prefs.getBoolean("firstrun", true)){
             prefs.edit().putString("theme", "white").commit();
             prefs.edit().putBoolean("firstrun", false).commit();
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         }
 
         rg = (RadioGroup)findViewById(R.id.theme);
 
         startService = (Button) findViewById(R.id.startService);
+        preview = (Button) findViewById(R.id.preview);
         sText = (EditText)findViewById(R.id.sText);
+        mainLL = (LinearLayout) findViewById(R.id.mainLL);
+
+        preview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(),"Long press for preview",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        preview.setOnTouchListener(previewTouchListener);
+
+        preview.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                isPreviewButtonLongPressed = true;
+                Intent i = new Intent(MainActivity.this,preview.class);
+                startActivity(i);
+                mainLL.setAlpha(0.25f);
+                return true;
+            }
+        });
 
 
         startService.setOnClickListener(new View.OnClickListener() {
@@ -179,14 +214,14 @@ public class MainActivity extends AppCompatActivity {
     public void setAdapters(String theme,boolean fromListener){
 
         String rearDef = "2131165296";
-        String frontDef = "2131165296";
+        String frontDef = "2131165325";
 
         if(!fromListener){
             if(theme.equals("white")){
                 ((RadioButton)rg.getChildAt(0)).setChecked(true);
             }else{
                 rearDef = "2131165297";
-                frontDef = "2131165297";
+                frontDef = "2131165324";
                 ((RadioButton)rg.getChildAt(1)).setChecked(true);
             }
         }
@@ -200,13 +235,13 @@ public class MainActivity extends AppCompatActivity {
             front.setAdapter(whiteAdapter);
             int index = Arrays.asList(white).indexOf(rearIcon);
             if(fromListener == true && index == -1){
-                index = Arrays.asList(white).indexOf(rearIcon);
+                index = Arrays.asList(black).indexOf(rearIcon);
             }
             Log.d("SHITT W",""+rearIcon + "  " + Arrays.asList(white).toString() + " " + index);
             rear.setSelection(index);
             index = Arrays.asList(white).indexOf(frontIcon);
             if(fromListener == true && index == -1){
-                index = Arrays.asList(white).indexOf(frontIcon);
+                index = Arrays.asList(black).indexOf(frontIcon);
             }
             Log.d("SHITT W",""+rearIcon + "  " + Arrays.asList(white).toString() + " " + index);
             front.setSelection(index);
@@ -320,6 +355,76 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(getApplicationContext(),"Permisions granted :-)",Toast.LENGTH_SHORT).show();
+                    getPermissions();
+                }else{
+                    Toast.makeText(getApplicationContext(),"#shotOn wont work unless granted these access permission :-(, you can always grant permissions again by clicking on 3dots on top & allow :-)",Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
+        }
+    }
+
+    public void getPermissions(){
+
+        if(Build.VERSION.SDK_INT >= 23) {
+            if (!Settings.canDrawOverlays(MainActivity.this)) {
+
+                try{
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            Uri.parse("package:" + getPackageName()));
+                    startActivityForResult(intent, 1234);
+                }catch (ActivityNotFoundException e){
+
+                    Log.d("SHOT", "Exception" + e );
+                }
+
+            }
+
+
+        }
+
+
+    }
+
+    public View.OnTouchListener previewTouchListener = new View.OnTouchListener() {
+
+        @Override
+        public boolean onTouch(View pView, MotionEvent pEvent) {
+            pView.onTouchEvent(pEvent);
+            // We're only interested in when the button is released.
+            if (pEvent.getAction() == MotionEvent.ACTION_UP) {
+                // We're only interested in anything if our speak button is currently pressed.
+                if (isPreviewButtonLongPressed) {
+                    // Do something when the button is released.
+                    com.example.bharath_5493.shoton.preview.fa.finish();
+                    mainLL.setAlpha(1.0f);
+                    isPreviewButtonLongPressed = false;
+                }
+            }
+            return false;
+        }
+    };
+
+
+    @Override
+    public void onBackPressed() {
+
+        exitCount++;
+        if(exitCount == 1){
+            Toast.makeText(getApplicationContext(), "Press back once again to exit", Toast.LENGTH_SHORT).show();
+        }else{
+            finish();
+        }
 
     }
 
