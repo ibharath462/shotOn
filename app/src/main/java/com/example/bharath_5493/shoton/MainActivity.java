@@ -48,6 +48,10 @@ import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.Random;
 
+import ru.dimorinny.showcasecard.ShowCaseView;
+import ru.dimorinny.showcasecard.position.ViewPosition;
+import ru.dimorinny.showcasecard.radius.Radius;
+
 public class MainActivity extends AppCompatActivity {
 
 
@@ -82,6 +86,11 @@ public class MainActivity extends AppCompatActivity {
             prefs.edit().putBoolean("firstrun", false).commit();
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+
+
+
+
+
         }
 
         rg = (RadioGroup)findViewById(R.id.theme);
@@ -183,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(false);
         actionBar.setDisplayShowHomeEnabled(true);
         actionBar.setTitle(heading);
-        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#00695C")));
+        actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#455A64")));
         actionBar.show();
 
     }
@@ -213,14 +222,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void setAdapters(String theme,boolean fromListener){
 
-        String rearDef = "2131165296";
+        String rearDef = String.valueOf(R.drawable.hdr1);
         String frontDef = "2131165325";
 
         if(!fromListener){
             if(theme.equals("white")){
                 ((RadioButton)rg.getChildAt(0)).setChecked(true);
             }else{
-                rearDef = "2131165297";
+                rearDef = String.valueOf(R.drawable.hdr2);
                 frontDef = "2131165324";
                 ((RadioButton)rg.getChildAt(1)).setChecked(true);
             }

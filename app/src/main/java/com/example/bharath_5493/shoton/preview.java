@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 public class preview extends Activity {
@@ -30,7 +32,8 @@ public class preview extends Activity {
     ImageView res;
     Button closePreview;
     public static Activity fa;
-
+    Bitmap bitmap;
+    ProgressBar pb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,66 +59,96 @@ public class preview extends Activity {
         getWindow().setBackgroundDrawable(ContextCompat.getDrawable(getApplicationContext(),R.drawable.rounded_corners));
 
         res = (ImageView)findViewById(R.id.res);
+        pb = (ProgressBar) findViewById(R.id.progressBar);
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.preview);
+        runOnBG bgThread = new runOnBG();
 
-
-
-        try {
-            Resources resources = getApplicationContext().getResources();
-            final SharedPreferences prefs = getApplicationContext().getSharedPreferences("com.pg.shoton", Context.MODE_PRIVATE);
-
-            String gText = prefs.getString("sText","பரத்தால் சுடப்பட்டது\nஒன் ப்ளஸ்ல்");
-            int selectedIcon = Integer.parseInt(prefs.getString("rear","2131165296"));
-            String theme = prefs.getString("theme","white");
+        bgThread.execute();
 
 
-            float scale = resources.getDisplayMetrics().density;
 
-            android.graphics.Bitmap.Config bitmapConfig =   bitmap.getConfig();
-            if(bitmapConfig == null) {
-                bitmapConfig = android.graphics.Bitmap.Config.ARGB_8888;
+    }
+
+    public  class runOnBG extends AsyncTask<String,String,String> {
+
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.preview);
+
+            pb.animate();
+
+            try {
+                Resources resources = getApplicationContext().getResources();
+                final SharedPreferences prefs = getApplicationContext().getSharedPreferences("com.pg.shoton", Context.MODE_PRIVATE);
+
+                String gText = prefs.getString("sText","பரத்தால் சுடப்பட்டது\nஒன் ப்ளஸ்ல்");
+                int selectedIcon = Integer.parseInt(prefs.getString("rear","2131165296"));
+                String theme = prefs.getString("theme","white");
+
+
+                float scale = resources.getDisplayMetrics().density;
+
+                android.graphics.Bitmap.Config bitmapConfig =   bitmap.getConfig();
+                if(bitmapConfig == null) {
+                    bitmapConfig = android.graphics.Bitmap.Config.ARGB_8888;
+                }
+                bitmap = bitmap.copy(bitmapConfig, true);
+
+                Canvas canvas = new Canvas(bitmap);
+                Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                paint.setColor(Color.WHITE);
+                if(theme.equals("black")){
+                    paint.setColor(Color.BLACK);
+                }
+                paint.setTextSize((int) (48 * scale));
+                paint.setStyle(Paint.Style.FILL_AND_STROKE);
+                paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
+                Rect bounds = new Rect();
+                int noOfLines = 0;
+                for (String line: gText.split("\n")) {
+                    noOfLines++;
+                }
+
+                paint.getTextBounds(gText, 0, gText.length(), bounds);
+                int x = 350;
+                int y = (bitmap.getHeight() - bounds.height()*noOfLines);
+
+                Paint mPaint = new Paint();
+                mPaint.setColor(getResources().getColor(R.color.transparentBlack));
+
+                for (String line: gText.split("\n")) {
+                    canvas.drawText(line, x, y, paint);
+                    y += paint.descent() - paint.ascent();
+                }
+
+                Bitmap icon = BitmapFactory.decodeResource(getResources(),
+                        selectedIcon);
+
+                canvas.drawBitmap(icon,40,bitmap.getHeight() - bounds.height()*noOfLines - 80,null);
+
+            } catch (Exception e) {
+                // TODO: handle exception
+                Log.d("SHOT", "ERRRORRORORORO" );
             }
-            bitmap = bitmap.copy(bitmapConfig, true);
 
-            Canvas canvas = new Canvas(bitmap);
-            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setColor(Color.WHITE);
-            if(theme.equals("black")){
-                paint.setColor(Color.BLACK);
-            }
-            paint.setTextSize((int) (48 * scale));
-            paint.setStyle(Paint.Style.FILL_AND_STROKE);
-            paint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
-            Rect bounds = new Rect();
-            int noOfLines = 0;
-            for (String line: gText.split("\n")) {
-                noOfLines++;
-            }
 
-            paint.getTextBounds(gText, 0, gText.length(), bounds);
-            int x = 350;
-            int y = (bitmap.getHeight() - bounds.height()*noOfLines);
+            return null;
+        }
 
-            Paint mPaint = new Paint();
-            mPaint.setColor(getResources().getColor(R.color.transparentBlack));
+        @Override
+        protected void onPostExecute(String s) {
 
-            for (String line: gText.split("\n")) {
-                canvas.drawText(line, x, y, paint);
-                y += paint.descent() - paint.ascent();
-            }
-
-            Bitmap icon = BitmapFactory.decodeResource(getResources(),
-                    selectedIcon);
-
-            canvas.drawBitmap(icon,40,bitmap.getHeight() - bounds.height()*noOfLines - 80,null);
-
-            res.setImageBitmap(bitmap);
-
-            Log.d("SHOT", "Done" );
-        } catch (Exception e) {
-            // TODO: handle exception
-
+            pb.setVisibility(View.GONE);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("SHOT", "Done" );
+                    res.setImageBitmap(bitmap);
+                }
+            });
+            super.onPostExecute(s);
         }
     }
 

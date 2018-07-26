@@ -277,6 +277,7 @@ public class cs extends Service {
                     new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
 
+
             Notification n = new Notification.Builder(this, chan1.getId())
                     .setContentTitle("#shotOn is running...")
                     .setContentText(""+gText)
